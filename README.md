@@ -43,9 +43,9 @@ The script is implemented in blocks:
 3) 'Getting the metadata':
     These functions retrieve the metadata of images associated with sequenceIDs. I used to have a function "metadata_mapillary", hence the name "metadata_mapillary_parallelized" which used forloops to iterate over sequenceIDs but it wasn't efficient. You can implement this but don't.
     
-    # "metadata_mapillary_parallelized" downloads the metadata of images, provided with a list of sequenceIDs using asynchronous download
+    "metadata_mapillary_parallelized" downloads the metadata of images, provided with a list of sequenceIDs using asynchronous download
     
-    # "metadata_mapillary_parallelized_wrapping" wraps around the latter to be used by a ProcessPoolExecutor or ThreadPoolExecutor since 'coroutines' cannot be passed to these.
+    "metadata_mapillary_parallelized_wrapping" wraps around the latter to be used by a ProcessPoolExecutor or ThreadPoolExecutor since 'coroutines' cannot be passed to these.
 
 4) 'Et Actio':
    Well well well, we need to use these functions somehow. Otherwise they were for naught
