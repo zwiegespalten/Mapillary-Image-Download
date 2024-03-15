@@ -18,7 +18,7 @@ which implement synchronous dealing with the Mapillary API. The other is the asy
 
  'process_one_sequence' and 'async_process_one_sequence' orchestrate the download of the image metadata for a single sequenceID
 
-## metadata_download.py
+##metadata_download.py
 
 This is the main script for the download of metadata. Like 'metadata_processing.py', it implements both synchronous and asynchronous downloads as well Multiprocessing and Multithreading.
 I have added the synchronous as well, even though asynchronous implementations combined with Multithreading seem to work the most efficiently. Asynchronous implementations came later
