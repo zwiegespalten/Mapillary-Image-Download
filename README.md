@@ -59,7 +59,15 @@ The script is implemented in blocks:
    'get_metadata' downloads the metadata associated with a list of sequenceIDs. You have the option to choose between the usage of only a ThreadPoolExecutor or a ThreadPoolExecutor combined with asynchronous download. Go for this, it is the default. Do not replace ThreadPoolExecutor with a ProcessPoolExecutor unless you want to suffer, then don't.
    
    'main' combines 'get_sequences' with 'get_metadata'
+## spacing_calculation.py
 
+This is small, lower level script to calculate distances and filter points based on them. Its functions will be called from 'data_integration_and_filtering.py'
+
+'distance_on_sphere_vectorized' is vectorized funtion to calculate the distance between two points. It is basically the haversine function and can also be used with points or two point arrays
+
+'filter_points' will iterate over points and their distances to one another within a sequence , aggregate them filter out those that are less than the wanted distance
+
+'calculate_spacing_vectorized' is a higher level function which will order the points based on their timestamp first and then apply 'filter_points'
 ## data_integration_and_filtering.py
 
 This script is one hell of a beast. It deals with the downloaded metadata. Like other scripts, it is divided into blocks with separate functionalities. The main aim of the script is:
