@@ -58,7 +58,7 @@ The script is implemented in blocks:
    
    'main' combines 'get_sequences' with 'get_metadata'
 
-##data_integration_and_filtering.py
+## data_integration_and_filtering.py
 
 This script is one hell of a beast. It deals with the downloaded metadata. Like other scripts, it is divided into blocks with separate functionalities. The main aim of the script is:
 
