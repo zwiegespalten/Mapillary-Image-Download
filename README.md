@@ -138,4 +138,35 @@ This is where all the magic happens. There are different functions to do basical
 
 'main' defines parameter names, spacing, number of workers etc and orchestrates the code for its implementation for both urban and non-urban cases. if concatenation is True, it will use 'concatenation_of_results' otherwise it will read the the grid number from the script name and implement 'process_in_chunks'. In the latter case, the script must be run again after the finalisation of 'process_in_chunks' to concatenate the results
 
+## image_download.py
+
+As the name suggests, this script is for the download of images whose metadata has been processed. This script should be copied as many as there are output .csv files in the output directory $processed_metadata/filtered$ and renamed as such. (0.py, 1.py, 2.py etc). The files will then read the metadata, download the images associated with them, resize and write the metadata to them. As in other scripts, this script, too, consists of blocks:
+
+### Some Math Functions for Metadata
+This block implement some math functions relevant to the reading and writing of the metadata to and from image files
+
+'to_deg' converts a decimal coordinate into degrees, minutes and seconds tuple
+'to_coords' reverts this process
+'change_to_rational' converts a number to a tuple of nominator and denominator
+'rational_real' reverts this
+
+### Writing to and Reading From Image Metadata
+
+This blocks aim is to implement two functions to write metadata to an image using PIEXIF TAGS and given such an image, to read the metadata from it
+
+'write_to_metadata': no need to elaborate on this further
+'read_from_metadata': as above
+
+### Image Download and Processsing
+
+This block here is all about downloading the image, resizing and saving it
+'get_image' as the name suggests, this mf here downloads the image and resize it
+'save_image' this here writes the metadata to the images, resized and original and saves them
+'process_image' this the higher level function coordinating both
+
+### Et Actio
+This is the block where the main function is located. Given a .csv file, it downloads, resizes, saves and adds the metadata to an image featuring a ThreadPoolExecutor to speed up the process. Info of the images that could not be saved will be written to the folder where the input files are located.   
+
+'main' does this using a ThreadPoolExecutor synchronously
+'async_main' does the same job using an eventloop. I haven't tried this yet but it can be an improvement. However, no improvement is actually needed, since the script is already efficient as it is.  
 
