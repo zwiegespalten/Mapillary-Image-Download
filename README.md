@@ -26,9 +26,10 @@ after hell of a trial and errors sprinkled with frustration and many existential
 
 The script is implemented in blocks: 
 
-1) Functions in block '-Division of bboxes' divide a given bbox into smaller bboxes. Duh. "divide_bbox" into 2. "segmented_bboxes" for more
+### Division of bboxes
+   Functions here divide a given bbox into smaller bboxes. Duh. "divide_bbox" into 2 smaller bbox along some line. "segmented_bboxes" does this, but into more bboxes
 
-2) 'Getting needed bboxes and unique sequences':
+### Getting needed bboxes and unique sequences
 
    These functions query a given bbox and return the sequenceIDs therein.They keep dividing the bbox calling themselves till less than 2000 elements are returned
    
@@ -40,14 +41,15 @@ The script is implemented in blocks:
    
    "async_get_bboxes_and_sequences_wrapping" as the name suggests, wraps "async_get_bboxes_and_sequences_higher_level" around. It runs the "async_get_bboxes_and_sequences_higher_level" asyncchronously and is meant to be used  if "async_get_bboxes_and_sequences_higher_level" is used within a ProcessPoolExecutor or ThreadPoolExecutor, as "coroutines" cannot be passed to these.
 
-3) 'Getting the metadata':
-    These functions retrieve the metadata of images associated with sequenceIDs. I used to have a function "metadata_mapillary", hence the name "metadata_mapillary_parallelized" which used forloops to iterate over sequenceIDs but it wasn't efficient. You can implement this but don't.
+### Getting the metadata
+ These functions retrieve the metadata of images associated with sequenceIDs. I used to have a function "metadata_mapillary", hence the name "metadata_mapillary_parallelized" which used forloops to 
+ iterate over sequenceIDs but it wasn't efficient. You can implement this but don't.
     
-    "metadata_mapillary_parallelized" downloads the metadata of images, provided with a list of sequenceIDs using asynchronous download
+ "metadata_mapillary_parallelized" downloads the metadata of images, provided with a list of sequenceIDs using asynchronous download
     
-    "metadata_mapillary_parallelized_wrapping" wraps around the latter to be used by a ProcessPoolExecutor or ThreadPoolExecutor since 'coroutines' cannot be passed to these.
+ "metadata_mapillary_parallelized_wrapping" wraps around the latter to be used by a ProcessPoolExecutor or ThreadPoolExecutor since 'coroutines' cannot be passed to these.
 
-4) 'Et Actio':
+### Et Actio
    Well well well, we need to use these functions somehow. Otherwise they were for naught
 
    'missing_sequences_download':  Since life sucks and you cannot download stuff when you want to such sequenceIDs will be saved into the directory so that you can try to download them later using this function here.
