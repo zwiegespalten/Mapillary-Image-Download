@@ -58,3 +58,23 @@ The script is implemented in blocks:
    
    'main' combines 'get_sequences' with 'get_metadata'
 
+##data_integration_and_filtering.py
+
+This script is one hell of a beast. It deals with the downloaded metadata. Like other scripts, it is divided into blocks with separate functionalities. The main aim of the script is:
+
+1) to read raw metadata from grids files
+2) to intersect the grids with a continent POLYGON to remove images outside of this continent. It could create a GKPG file for the whole coverage of a continent with raw metadata. However, this does not work very well due to file being very large and memory errors. If this should be possible, it will also divide this file into some number of .csv files so that the images can be downloaded in the next step in parallel
+3) to intersect the raw metadata of a continent with urban polygons. Depending on the function being used, it can either do this by getting the whole raw metadata first and then intersecting it urban polygons but this drains memory or by intersecting the metadata of a grid with urban polygon. The second approach is the default. Caution is advised for the first one. Some parts of the code must be de-commented out if you want to use the first approach. The intersected raw metadata for urban and non-urban areas will be written to files
+4) to apply the spacing condition to urban and non-urban areas separately. The script as it is will handle at each it is run, only one grid, this script is should be run as many times as there are grids and the name of the script must be changed to the number of grid. The filtered DataFrames will be written to .GPKG files. It can also create LineStrings from the sequences if this is wanted too
+5) It will concatenate the results from different grids together, writes it to a finalised .GPKG file and divide its content to a number of .csv files for the download of images in parallel. However, for the concatenation of the results, the script must be run once again and the condition in the main function must be changed.
+
+Now the blocks:
+### Reading and Writing Files: 
+This block serves the purporse of reading the image metadata and writing them to smaller files
+'read_file' is for reading the image metadata with pre-given data types
+'write_file' is just to write a file to .csv
+'writing_to_new_files' divides a DataFrame into 'number_of_files' and writes them into files
+'unification_parallel' reads csv files using 'read_file' and ProcessPoolExecutor and concatenates them to create
+a DataFrame containing metadata from all files. However, it should be used with caution since it uses a great deal of
+Memory and can result in memory error if used with unfiltered raw metadata
+   
