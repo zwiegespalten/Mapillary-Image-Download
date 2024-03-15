@@ -80,3 +80,48 @@ This block serves the purporse of reading the image metadata and writing them to
 a DataFrame containing metadata from all files. However, it should be used with caution since it uses a great deal of
 Memory and can result in memory error if used with unfiltered raw metadata
    
+### Intersection
+This block has two functions and serves the purpose of intersecting a DataFrame with a Polygon
+
+'intersect_chunk' is the actual function intersecting a DataFrame
+'parallel_intersect' coordinates the 'intersect_chunk' by using a PoolProcessExecutor and dividing a given DataFrame into smaller chunks to speed up the process. Caution advised if the DataFrame is very large, then a memory error could be thrown
+
+### Spatial Filtering
+
+This block here applies the spacing to raw metadata
+'chunk_spacing' is the function that groups and filters the metadata based on 'interval_length' by passing them to 'calculate_spacing_vectorized'. If 'line_string_true' is True, it will also create LineStrings from  the filtered metadata
+
+'parallel_spacing' coordinates the application of 'chunk_spacing' by dividing the metadata into chunks and running thecode concurrently using ProcessPoolExecutor
+
+### LineStrings for Postprocessing
+This block creates LineStrings from filtered metadata and concatenate them
+
+'create_LineString' does the creation of LineStrings. However, the gdf should only contain one sequence
+'combine_LineStrings' concatenates LineStrings that have the same sequenceID. More than one LineSTrings with the same sequenceID could be created, if a sequence is divided between chunks. This function here corrects such cases.  
+
+### Comparing with older Files and updating them
+This block here is to fill the missing data in the older versions of the Database 'removing_duplicates' compare a given (filtered) DataFrame with another DataFrame (the older version) and removes duplicates if there are any
+ 
+'process_one_pic' downloads the metadata associated with an image. It is meant to be used with 'adding_timestamps' to extract the timestamp info of a given image
+
+'adding_timestamps' adds the timestamp column to the older version of the Databas. However, it takes too much time so it is not efficient and the code must be improved. A possible approach would be to use asynchronous download in 'process_one_pic' by changing 'process_one_sequence' to 'async_process_one_sequence' and restructuring both functions to for asynchronous case 
+
+### Orchestrating the Code
+
+This is where all the magic happens. There are different functions to do basically the same thing. The reason why there are so many of them is due to many trial and errors sprinkled with existential angst, frustration and Memory errors.
+
+'get_all_unfiltered_metadata_at_once' reads the .csv files in a directory that have the same structure based on a condition concatenates them using 'unification_parallel', intersects the concatenated raw metadata with a continent polygon, writes this raw metadata to some number of files, in case somebody wants to download unfiltered images. It then goes on to intersecting this raw metadata with urban polygons of a continent and returns both the data within the polygons as well as the rest for further processsing. This could work for a continent with not many roads such as Africa but otherwise the memory usage is very high and the process could terminate with a Memory Error. Use it with caution
+
+'get_metadata' is the lowest level function in this case which reads a .csv file, intersects it first with a continent POLYGON and then with an urban POLYGON and returns the raw metadata for urban and non-urban areas so that they can be processed further where spacing will be applied. This function is meant to be used within another function. The resulting unfiltered raw files for both urban and non urban areas will be written to the output directory as .csv files
+
+'get_metadata_in_chunks': same functionality as 'get_all_unfiltered_metadata_at_once' but without concatenating the raw metadata from all grids and then intersecting with the continent and then later with the urban polygons. This function instead uses a ProcessPoolExecutor and the function 'get_metadata' to read files from the input directory and intersect with continent and urban POLYGONs
+
+'process_areas' uses either the raw results either from 'get_metadata_in_chunks' or from 'get_all_unfiltered_metadata_at_once' removes duplicates if there are any vis-a-vis the old database and then goes on to applying the spacing to both the urban and non-urban areas. Then, it writes the duplicated-removed unfiltered raw metadata as well as the filtered metadata for both urban and non-urban areas to .GPKG files as well as to .csv files around 500ish so that the images could be downloaded. This function can only work however, if there has been no memory errors in former steps in 'get_all_unfiltered_metadata_at_once' or in 'get_metadata_in_chunks', so it is highly unlikely. Hence the commenting out the relevant steps in the script
+
+'process_in_chunks' is a higher level function for 'get_metadata'. It passes a file directory as well as relevant POLYGONs to 'get_metadata' and then applies the spacing to both the urban and non-urban areas separately. It will create LineStrings as well if this is wanted. The filtered files for both urban and non-urban areas will be written to directories as .gkpg files. This is the best approach so far. 
+
+'get_metadata_and_process_them_in_chunks' is a higher level function for 'process_in_chunks'. It calls this concurrently and passes each time a file in the input directory. The resulting filtered urban and non-urban DataFrames will be concatenated including the  LineStrings. Duplicates will be removed in both cases. The resulting files will be written as .GPKG files onto the output directory and GeoDataFrames for urban and non-urban areas will be divided into a number of .csv files so that the images associated with the metadata could be downloaded parallely. Despite the noble idea, this approach drains the memory most of the time, so I commented out its usage. A more sound approach seems to be run as many as scripts as there are grids, write the filtered metadata form each script to files and then reading the filtered .gpkg files from a different script and doing all this.
+
+'concatenation_of_results' concatenates as the name suggests .GPKG files from the input directory which have earlier been created by 'process_in_chunks' in parallel, removes any duplicates vis-a-vis the old database the concatenated file to a GKPG and divides it into some number of files for parallel download.
+
+'main' defines parameter names, spacing, number of workers etc and orchestrates the code for its implementation for both urban and non-urban cases. if concatenation is True, it will use 'concatenation_of_results' otherwise it will read the the grid number from the script name and implement 'process_in_chunks'. In the latter case, the script must be run again after the finalisation of 'process_in_chunks' to concatenate the results
