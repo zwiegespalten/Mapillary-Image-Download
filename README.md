@@ -59,6 +59,10 @@ The script is implemented in blocks:
    'get_metadata' downloads the metadata associated with a list of sequenceIDs. You have the option to choose between the usage of only a ThreadPoolExecutor or a ThreadPoolExecutor combined with asynchronous download. Go for this, it is the default. Do not replace ThreadPoolExecutor with a ProcessPoolExecutor unless you want to suffer, then don't.
    
    'main' combines 'get_sequences' with 'get_metadata'
+
+## missing_sequences.py
+
+This is a small script with only one functionality, that is the download of missing sequences. There happens to be some sequences that could not be downloaded by 'metadata_download.py'. The code will skip these sequences after awhile and continue with the download of the rest of the sequences while writing the undownloaded sequences to a .csv file. The main function of this script will read these files from the multitude of grids, put them together and try to download them. That is why this script should be run AFTER all grid downloads have been completed. 
 ## spacing_calculation.py
 
 This is small, lower level script to calculate distances and filter points based on them. Its functions will be called from 'data_integration_and_filtering.py'
@@ -133,3 +137,5 @@ This is where all the magic happens. There are different functions to do basical
 'concatenation_of_results' concatenates as the name suggests .GPKG files from the input directory which have earlier been created by 'process_in_chunks' in parallel, removes any duplicates vis-a-vis the old database the concatenated file to a GKPG and divides it into some number of files for parallel download.
 
 'main' defines parameter names, spacing, number of workers etc and orchestrates the code for its implementation for both urban and non-urban cases. if concatenation is True, it will use 'concatenation_of_results' otherwise it will read the the grid number from the script name and implement 'process_in_chunks'. In the latter case, the script must be run again after the finalisation of 'process_in_chunks' to concatenate the results
+
+
